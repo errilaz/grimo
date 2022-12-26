@@ -1,0 +1,25 @@
+{
+  "name": "@grimo/metadata",
+  "version": "0.0.1",
+  "description": "Grimo Metadata Library",
+  "license": "MIT",
+  "author": {
+    "name": "errilaz",
+    "url": "http://github.com/errilaz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/errilaz/grimo.git"
+  },
+  "main": "src/metadata.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --project .",
+    "clean": "rm -rf lib"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.2"
+  }
+}

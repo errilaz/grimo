@@ -1,0 +1,36 @@
+{
+  "name": "@grimo/cli",
+  "version": "0.0.1",
+  "description": "Grimo CLI",
+  "license": "MIT",
+  "author": {
+    "name": "errilaz",
+    "url": "http://github.com/errilaz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/errilaz/grimo.git"
+  },
+  "bin": {
+    "grimo": "./bin/grimo"
+  },
+  "scripts": {
+    "build": "tsc --project .",
+    "clean": "rm -rf lib"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@grimo/api-discovery": "workspace:*",
+    "@grimo/generate-typescript": "workspace:*",
+    "pg-promise": "^10.11.1",
+    "toptions": "^1.0.2"
+  },
+  "devDependencies": {
+    "@grimo/metadata": "workspace:*",
+    "@types/node": "^17.0.21",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.6.2"
+  }
+}

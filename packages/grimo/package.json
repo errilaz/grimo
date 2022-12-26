@@ -1,0 +1,34 @@
+{
+  "name": "grimo",
+  "version": "0.0.1",
+  "description": "Grimo Data Framework",
+  "license": "MIT",
+  "author": {
+    "name": "errilaz",
+    "url": "http://github.com/errilaz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/errilaz/grimo.git"
+  },
+  "main": "src/grimo.ts",
+  "scripts": {
+    "build": "tsc --project .",
+    "clean": "rm -rf lib"
+  },
+  "publishConfig": {
+    "main": "lib/grimo.js"
+  },
+  "dependencies": {
+    "@grimo/api-client": "workspace:*",
+    "@grimo/middleware-koa": "workspace:*",
+    "@grimo/middleware-express": "workspace:*",
+    "@grimo/middleware-hattip": "workspace:*",
+    "@grimo/transport-db": "workspace:*",
+    "@grimo/metadata": "workspace:*",
+    "@grimo/transport-web": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.2"
+  }
+}

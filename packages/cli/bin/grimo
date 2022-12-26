@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+const { spawn } = require("child_process")
+const { resolve } = require("path")
+
+if (process.env.GRIMO_DEV?.toLowerCase() === "true") {
+  const project = resolve(`${__dirname}/../tsconfig.json`)
+  const cli = resolve(`${__dirname}/../src/cli.ts`)
+  console.log("ℹ️  GRIMO_DEV=true")
+  start(`${__dirname}/../node_modules/.bin/ts-node`, "-P", project, cli, ...process.argv.slice(2))
+}
+else {
+  const cli = resolve(`${__dirname}/../lib/cli.js`)
+  start("node", cli, ...process.argv.slice(2))
+}
+
+function start(command, ...args) {
+  return spawn(command, args, {
+    detached: true,
+    stdio: "inherit"
+  })
+}

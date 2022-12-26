@@ -1,0 +1,27 @@
+{
+  "name": "@grimo/transport-web",
+  "version": "0.0.1",
+  "description": "Grimo Web Transport",
+  "license": "MIT",
+  "author": {
+    "name": "errilaz",
+    "url": "http://github.com/errilaz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/errilaz/grimo.git"
+  },
+  "main": "src/webTransport.ts",
+  "scripts": {   
+    "build": "tsc --project .",
+    "clean": "rm -rf lib"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "lib/webTransport.js"
+  },
+  "devDependencies": {
+    "@grimo/metadata": "workspace:*",
+    "typescript": "^4.6.2"
+  }
+}

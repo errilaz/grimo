@@ -1,0 +1,27 @@
+{
+  "name": "@grimo/api-client",
+  "version": "0.0.1",
+  "description": "Grimo API Client",
+  "license": "MIT",
+  "author": {
+    "name": "errilaz",
+    "url": "http://github.com/errilaz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/errilaz/grimo.git"
+  },
+  "main": "src/apiClient.ts",
+  "scripts": {
+    "build": "tsc --project .",
+    "clean": "rm -rf lib"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "lib/apiClient.js"
+  },
+  "devDependencies": {
+    "@grimo/metadata": "workspace:*",
+    "typescript": "^4.6.2"
+  }
+}

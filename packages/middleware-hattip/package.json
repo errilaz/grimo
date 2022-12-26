@@ -1,0 +1,31 @@
+{
+  "name": "@grimo/middleware-hattip",
+  "version": "0.0.1",
+  "description": "Grimo API Middleware for HatTip",
+  "license": "MIT",
+  "author": {
+    "name": "errilaz",
+    "url": "http://github.com/errilaz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/errilaz/grimo.git"
+  },
+  "main": "src/hatTipMiddleware.ts",
+  "scripts": {
+    "build": "tsc --project .",
+    "clean": "rm -rf lib"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "lib/hatTipMiddleware.js"
+  },
+  "devDependencies": {
+    "@hattip/core": "^0.0.22",
+    "@grimo/metadata": "workspace:*",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "@hattip/compose": "^0.0.22"
+  }
+}

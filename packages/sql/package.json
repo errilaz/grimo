@@ -1,0 +1,28 @@
+{
+  "name": "@grimo/sql",
+  "version": "0.0.1",
+  "description": "Grimo SQL Generator",
+  "license": "MIT",
+  "author": {
+    "name": "errilaz",
+    "url": "http://github.com/errilaz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/errilaz/grimo.git"
+  },
+  "main": "src/sqlGenerator.ts",
+  "scripts": {
+    "build": "tsc --project .",
+    "clean": "rm -rf lib"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "lib/sqlGenerator.js"
+  },
+  "devDependencies": {
+    "@grimo/metadata": "workspace:*",
+    "pg-promise": "^10.11.1",
+    "typescript": "^4.6.2"
+  }
+}

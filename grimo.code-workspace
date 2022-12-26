@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/node_modules": true,
+      "**/lib": true,
+      "**/dist": true,
+    },
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+  }
+}
