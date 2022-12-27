@@ -49,4 +49,4 @@ For years I made various attempts at code-first database schema from the side of
 
 Realizing that Postgres has everything I need already, and is in fact a better place to place logic related to the data, I decided to reverse the direction and generate the client artifacts from those defined in SQL; relying on Postgres' rich features, including triggers, RLS, and great user-defined types.
 
-PostFirst began as a simple alternative to Supabase's type generator, which, at the time, was fairly limited. Supabase is amazing but is a large & opinionated project which couples to a lot of components I don't always necessarily need or want, so I've decided to make this a standalone project, usable with or without Supabase.
+Grimo began as a simple alternative to Supabase's type generator, which, at the time, was fairly limited. Supabase is amazing but is a large & opinionated project which couples to a lot of components I don't always necessarily need or want, so I've decided to make this a standalone project, usable with or without Supabase.
