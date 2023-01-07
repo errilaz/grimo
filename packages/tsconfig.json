@@ -13,6 +13,6 @@
     "strict": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": false
   }
 }
