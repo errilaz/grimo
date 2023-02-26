@@ -16,8 +16,11 @@
 - [x] Strongly typed API generator
 - [x] SELECT and function query builder
 - [x] Integration with Express, Koa, HatTip
+- [ ] `transport-supabase`
 - [ ] `middleware-fastify`
-- [ ] INSERT, UPDATE, DELETE
+- [ ] `transport-db`: INSERT, UPDATE, DELETE
+- [ ] `metadata`/`api-client`: Support additional filters (`like`, `ilike`, `in`, etc.)
+- [ ] Support `select count`
 - [ ] Support connection parameters in grimo.json
 - [ ] Example project
 - [ ] Smarter schema discovery (views, FKs, and better UDTs)
@@ -26,10 +29,9 @@
 
 ## Backlog
 
-- [ ] `driver-node` package (decouple others from pg-promise)
-- [ ] `driver-deno` package
-- [ ] `driver-bun` package
+- [ ] Switch to `postgres` client - fast & supports node, deno, and bun
 - [ ] `generate-flow` package
+- [ ] `generate-rescript` package
 - [ ] Way to discover/generate proper union types
 - [ ] Reusable authentication & authorization
 - [ ] Realtime streams
