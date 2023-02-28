@@ -20,8 +20,6 @@ export default async function discoverApi(db: Database, settings: Partial<Discov
     }
   }
 
-  console.log(udts)
-
   log("discovering enum types")
   const enums = await discoverEnums(db)
   log("enums", enums)
@@ -54,7 +52,6 @@ export default async function discoverApi(db: Database, settings: Partial<Discov
     if (verbose) console.log(...args)
   }
 }
-
 
 export interface UdtOptions {
   string: string[]
@@ -295,7 +292,7 @@ const isNumberType = (s: string | null) => s && ([
 
 const isStringType = (s: string | null) => s && ([
   "text",
-  "text_not_blank",
+  "text_not_blank", // TODO: oops
   "uuid",
   "citext",
 ]).includes(s)
