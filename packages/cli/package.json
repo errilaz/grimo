@@ -25,7 +25,7 @@
     "@grimo/api-discovery": "workspace:*",
     "@grimo/generate-typescript": "workspace:*",
     "pg-promise": "^10.11.1",
-    "toptions": "^1.0.2"
+    "toptions": "^2.0.0"
   },
   "devDependencies": {
     "@grimo/metadata": "workspace:*",

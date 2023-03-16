@@ -2,7 +2,7 @@ import { Database } from "./common"
 import { CompositeRecord } from "./findComposites"
 import { findColumns } from "./findTables"
 
-interface ViewRecord extends CompositeRecord {
+export interface ViewRecord extends CompositeRecord {
   updatable: boolean
   insertable: boolean
 }

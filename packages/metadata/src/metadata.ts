@@ -34,21 +34,24 @@ export interface DbFormatter {
 /** Information about the schema. */
 export interface SchemaData {
   tables: TableData[]
+  views: ViewData[]
   types: TypeData[]
   enums: EnumData[]
-  functions: FuncData[]
+  functions: FunctionData[]
 }
 
 /** Type representations of database values. */
 export type ApiType = 
 | "boolean"
 | "number"
+| "bigint"
 | "string"
 | "json"
-| "Date"
-| ["enum", EnumData]
-| ["interface", TypeData]
+| "date"
+| ["enum", string]
+| ["interface", string]
 | ["array", ApiType]
+| ["override", string]
 
 /** Table metadata. */
 export interface TableData {
@@ -94,7 +97,7 @@ export interface AttributeData {
   order: number
   /** Whether this attribute allows NULL as a value. */
   nullable: boolean
-  /** Api type of the attribute. */
+  /** API type of the attribute. */
   apiType: ApiType
 }
 
@@ -117,14 +120,14 @@ export interface FieldData {
 }
 
 /** Represents a database function (stored procedure). */
-export interface FuncData {
-  /** Name of the database function. */
+export interface FunctionData {
+  /** Database name of the function. */
   name: string
   /** Parameters this function accepts. */
   parameters: AttributeData[]
   /** Database type of the return value. */
   returnType: string
-  /** Api type of the return value. */
+  /** API type of the return value. */
   apiReturnType: ApiType
 }
 

@@ -1,5 +1,5 @@
 import { EnumData } from "@grimo/metadata"
-import { Database, snakeToPascal } from "./common"
+import { Database, apiName } from "./common"
 
 /** Collect metadata about database enums. */
 export default async function findEnums(db: Database): Promise<EnumData[]> {
@@ -20,7 +20,7 @@ export default async function findEnums(db: Database): Promise<EnumData[]> {
     `)).reduce((enums, { name, order, enum_name }) => {
     let enu = enums.find(e => e.name === enum_name)
     if (!enu) {
-      enu = { name: enum_name, apiName: snakeToPascal(enum_name), fields: [] }
+      enu = { name: enum_name, apiName: apiName(enum_name), fields: [] }
       enums.push(enu)
     }
     enu.fields.push({ name, order })

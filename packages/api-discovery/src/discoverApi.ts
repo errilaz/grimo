@@ -1,81 +1,124 @@
-import type { SchemaData, EnumData, TypeData, TableData, FuncData, ApiType, AttributeData } from "@grimo/metadata"
-import { Database } from "./common"
-import findComposites from "./findComposites"
+import type { SchemaData, TypeData, TableData, FunctionData, ApiType, AttributeData, ViewData } from "@grimo/metadata"
+import { Database, apiName } from "./common"
+import findComposites, { AttributeRecord, CompositeRecord } from "./findComposites"
+import findDomains from "./findDomains"
 import findEnums from "./findEnums"
-import findFunctions from "./findFunctions"
+import findFunctions, { FunctionRecord } from "./findFunctions"
 import findTables from "./findTables"
-import findViews from "./findViews"
+import findViews, { ViewRecord } from "./findViews"
 
-/**
- * This is a rough first pass at the schema inspector.
- *    TODO: views
- *    TODO: represent foreign keys & primary keys
- *    TODO: better UDT detection
- */
+export interface DiscoverOptions {
+  override?: { [type: string]: string }
+}
+
+const userDefined = "USER-DEFINED"
 
 /** Inspect a database and build the metadata necessary to generate the API. */
-export default async function discover(db: Database, settings: Partial<DiscoverOptions> = {}): Promise<SchemaData> {
-  const { verbose, udts }: DiscoverOptions = {
-    verbose: !!settings.verbose,
-    udts: {
-      string: settings.udts?.string || [],
-      number: settings.udts?.number || [],
+export default async function discover(db: Database, options: DiscoverOptions) {
+  const override = options.override ?? {}
+
+  const enums = await findEnums(db)
+  const composites = await findComposites(db)
+  const tables = await findTables(db)
+  const views = await findViews(db)
+  const domains = await findDomains(db)
+  const functions = await findFunctions(db)
+  return createSchema()
+
+  function createSchema(): SchemaData {
+    return {
+      enums,
+      types: composites.map(createType),
+      tables: tables.map(createTable),
+      views: views.map(createView),
+      functions: functions.map(createFunction),
     }
   }
 
-  log("discovering enum types")
-  const enums = await findEnums(db)
-  log("enums", enums)
+  function createType({ name, attributes }: CompositeRecord): TypeData {
+    return {
+      name,
+      apiName: apiName(name),
+      attributes: attributes.map(createAttribute),
+    }
+  }
 
-  log("discovering composite types")
-  const composites = await findComposites(db)
-  log("composite types", composites)
+  function createTable({ name, attributes }: CompositeRecord): TableData {
+    return {
+      name,
+      apiName: apiName(name),
+      columns: attributes.map(createAttribute),
+    }
+  }
 
-  log("discovering tables")
-  const tables = await findTables(db)
-  log("tables", tables)
+  function createView({ name, attributes, updatable, insertable }: ViewRecord): ViewData {
+    return {
+      name,
+      insertable,
+      updatable,
+      apiName: apiName(name),
+      columns: attributes.map(createAttribute),
+    }
+  }
 
-  log("discovering views")
-  const views = await findViews(db)
-  log("views", views)
+  function createFunction({ name, type, udt, parameters }: FunctionRecord): FunctionData {
+    return {
+      name,
+      returnType: type,
+      apiReturnType: resolveType(type, udt),
+      parameters: parameters.map(createAttribute),
+    }
+  }
 
-  log("discovering functions")
-  const functions = await findFunctions(db)
-  log("functions", functions)
+  function createAttribute({ name, type, udt, order, nullable }: AttributeRecord): AttributeData {
+    return {
+      name,
+      type,
+      order,
+      nullable,
+      apiType: resolveType(type, udt),
+    }
+  }
 
-  // const schema = { enums, types, tables, functions }
-
-  log("resolving types")
-  const resolved = resolveTypes(schema)
-  log("resolutions", resolved)
-
-  // log("resolving relationships")
-  // const relationships = await resolveRelationships(db, schema)
-  // log("relationships", relationships)
-
-  process.exit()
-  return {}
-
-  function log(text: string, things?: { name: string }[]) {
-    if (verbose) console.log(text + (!things ? "" : ": " + things?.map(t => t.name).join(", ")))
+  function resolveType(type: string, udt: string | null): ApiType {
+    if (override.hasOwnProperty(type)) {
+      return ["override", override[type]]
+    }
+    if (udt && override.hasOwnProperty(udt)) {
+      return ["override", udt]
+    }
+    if (isBooleanType(type) || isBooleanType(udt)) {
+      return "boolean"
+    }
+    if (isNumberType(type) || isNumberType(udt)) {
+      return "number"
+    }
+    if (isStringType(type) || isStringType(udt)) {
+      return "string"
+    }
+    if (isDateType(type) || isDateType(udt)) {
+      return "date"
+    }
+    if (isBigIntType(type) || isBigIntType(udt)) {
+      return "bigint"
+    }
+    if (isJsonType(type) || isJsonType(udt)) {
+      return "json"
+    }
+    if (type === userDefined) {
+      const enu = enums.find(e => e.name === udt)
+      if (enu) return ["enum", enu.apiName]
+      const composite = composites.find(c => c.name === udt)
+      if (composite) return ["interface", apiName(composite.name)]
+    }
+    console.log(type, udt)
+    console.log(domains)
+    return "UNRESOLVED" as unknown as ApiType
   }
 }
 
-export interface UdtOptions {
-  string: string[]
-  number: string[]
-}
-
-export interface DiscoverOptions {
-  verbose: boolean
-  // TODO: make inspector smart enough to obviate need for this
-  udts: UdtOptions
-}
-
-const UNRESOLVED_UDT = "UNRESOLVED_UDT"
-
 /** Collect metadata about user-defined types. */
-function resolveTypes({ enums, types, tables, functions }: SchemaData) {
+function resolveTypesOld({ enums, types, tables, functions }: SchemaData) {
   let resolved = 0
   for (const type of types) {
     for (const attr of type.attributes) {
@@ -122,28 +165,6 @@ function resolveTypes({ enums, types, tables, functions }: SchemaData) {
   }
 }
 
-// Currently disabled because it is unused and needs work.
-async function resolveRelationships(db: Database, { enums, types, tables }: SchemaData) {
-  // const columns: AttrRecord[] = []
-  // const keys: KeyRecord[] = []
-  // info("discovering table details")
-  // for (const table of tables) {
-  //   const tableKeys = await db.manyOrNone<KeyRecord>(sql`
-  //   select su.table_name "source_table", su.column_name "source_column", tu.table_name "target_table", tu.column_name "target_column"
-  //     from information_schema.key_column_usage su
-  //     join information_schema.referential_constraints rc
-  //       on rc.constraint_name = su.constraint_name
-  //      and su.constraint_schema = 'public'
-  //      and su.table_name = '${table.name}'
-  //      and su.position_in_unique_constraint notnull
-  //     join information_schema.key_column_usage tu
-  //       on tu.constraint_name = rc.unique_constraint_name
-  //   `)
-  //   log(`${table.name} foreign keys`, tableKeys.map(k => `${k.source_column}->${k.target_table}.${k.target_column}`).join(", "))
-  //   keys.push(...tableKeys)
-  // }
-  return 0
-}
 /** Hacky function to support UDTs with naming convention `*_not_null` */
 function makeGetAttribute(udts: UdtOptions) {
   // TODO: make HOF, pass in UDTs from config
@@ -184,11 +205,11 @@ function deduceType(type: string, udt: string | null, udts: UdtOptions): ApiType
   ) {
     return "string"
   }
-  else if (isKnownDateType(type) || isKnownDateType(udt)) {
-    return "Date"
+  else if (isDateType(type) || isDateType(udt)) {
+    return "date"
   }
   else if (type === "json" || type === "jsonb") {
-    return "object"
+    return "json"
   }
   else if (type === "USER-DEFINED") {
     return [UNRESOLVED_UDT, udt] as unknown as ApiType
@@ -207,28 +228,54 @@ function forceDeduceType(type: string, udt: string | null, udts: UdtOptions) {
   return t
 }
 
-const isNumberType = (s: string | null) => s && ([
+const isBooleanType = (t: string | null) => typeof t === "string" && [
+  "boolean",
+  "bool",
+].includes(t)
+
+const isNumberType = (t: string | null) => typeof t === "string" && [
   "int2",
   "int4",
   "int8",
-  "bigint",
-  "money",
-  "numeric"
-]).includes(s)
+  "smallint",
+  "integer",
+  "real",
+  "double precision",
+  "smallserial",
+  "serial",
+].includes(t)
 
-const isStringType = (s: string | null) => s && ([
+const isBigIntType = (t: string | null) => typeof t === "string" && [
+  "bigint",
+  "bigserial",
+].includes(t)
+
+const isStringType = (t: string | null) => typeof t === "string" && [
   "text",
-  "text_not_blank", // TODO: oops
   "uuid",
   "citext",
-]).includes(s)
+  "money",
+  "decimal",
+  "numeric",
+  "character",
+  "character varying",
+  "cidr",
+  "inet",
+  "macaddr",
+  "macaddr8",
+].includes(t)
 
-const isKnownDateType = (s: string | null) => s && ([
+const isDateType = (t: string | null) => t && [
   "timestamp",
   "timestamptz",
   "timestamp without time zone",
   "timestamp with time zone",
-]).includes(s)
+].includes(t)
+
+const isJsonType = (t: string | null) => typeof t === "string" && [
+  "json",
+  "jsonb",
+].includes(t)
 
 interface AttrRecord {
   name: string
@@ -237,11 +284,4 @@ interface AttrRecord {
   udt: string | null
   nullable: boolean
   table: string
-}
-
-interface KeyRecord {
-  source_table: string
-  source_column: string
-  target_table: string
-  target_column: string
 }

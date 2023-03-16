@@ -1,6 +1,6 @@
 import pg from "pg-promise"
 import options from "toptions"
-import discover, { UdtOptions } from "@grimo/api-discovery"
+import discover from "@grimo/api-discovery"
 import generate from "@grimo/generate-typescript"
 import { promises as FS } from "fs"
 import { constants as FS_CONSTANTS } from "fs"
@@ -13,22 +13,18 @@ const DB_USER = process.env.DB_USER || "postgres"
 const DB_PASS = process.env.DB_PASS || "postgres"
 
 const parse = options({
-  command: options.arg(0, [
-    ["discover", "print human schema information"],
-    ["discover-json", "print schema in JSON"],
-    ["discover-ts", "print schema in TypeScript"],
-    ["build", "discover and build TypeScript output"],
-  ]),
-  file: options.flag("f", "path to project file (grimo.json)"),
-  output: options.flag("o", "send results to file"),
-  host: options.flag("h", "database hostname", DB_HOST),
-  port: options.flag("p", "database port", DB_PORT),
-  dbname: options.flag("d", "database name", DB_NAME),
-  user: options.flag("U", "database user name", DB_USER),
-  help: options.bit("Display this message"),
+  command: options.arg(0),
+  file: options.flag("f"),
+  output: options.flag("o"),
+  host: options.flag("h", DB_HOST),
+  port: options.flag("p", DB_PORT),
+  dbname: options.flag("d", DB_NAME),
+  user: options.flag("U", DB_USER),
+  global: options.flag("g"),
+  help: options.bit(),
 })
 
-const { command, help, host, port, dbname, user, file, output } = parse(process.argv.slice(2))
+const { command, help, file, ...config } = parse(process.argv.slice(2))
 
 if (command === null) {
   console.log("Missing command!")
@@ -45,39 +41,37 @@ cli()
   .catch(e => { console.error(e); process.exit(1) })
 
 async function cli() {
+  const project = await loadProject()
+  Object.assign(project, config)
   switch (command) {
     case "discover": {
-      const project = await loadProject()
-      const database = await connect(true)
-      await discover(database, { verbose: true, udts: project.udts })
+      const database = await connect(project)
+      await discover(database, project)
       break
     }
     case "discover-json": {
-      const project = await loadProject()
-      const database = await connect()
-      const schema = await discover(database, { udts: project.udts })
+      const database = await connect(project)
+      const schema = await discover(database, project)
       console.log(JSON.stringify(schema, null, 2))
       break
     }
     case "discover-ts": {
-      const project = await loadProject()
-      const database = await connect()
-      const schema = await discover(database, { udts: project.udts })
-      const ts = generate(schema)
+      const database = await connect(project)
+      const schema = await discover(database, project)
+      const ts = generate(schema, project)
       console.log(ts)
       break
     }
     case "build": {
-      const project = await loadProject()
-      const path = output || project.output || null
+      const path = project.output || null
       if (path === null) {
-        console.error("No output file specified")
+        console.error("No output file specified.")
         process.exit(1)
         break
       }
-      const database = await connect(true)
-      const schema = await discover(database, { verbose: true, udts: project.udts })
-      const ts = generate(schema)
+      const database = await connect(project)
+      const schema = await discover(database, project)
+      const ts = generate(schema, project)
       await FS.writeFile(path, ts, "utf8")
       break
     }
@@ -93,7 +87,12 @@ type Database = pg.IConnected<{}, any>
 
 interface Project {
   output?: string
-  udts?: UdtOptions
+  host?: string
+  port?: string
+  dbname?: string
+  user?: string
+  override?: { [type: string]: string }
+  global?: boolean
 }
 
 async function loadProject() {
@@ -107,8 +106,8 @@ async function loadProject() {
   return project
 }
 
-async function connect(verbose = false): Promise<Database> {
-  if (verbose) console.log(`connecting to ${user}@${host}:${port}/${dbname}`)
+async function connect({ user, host, port, dbname }: Project): Promise<Database> {
+  console.log(`connecting to ${user}@${host}:${port}/${dbname}`)
   const conn = pg()({
     host: host!,
     port: parseInt(port!, 10),
@@ -117,7 +116,7 @@ async function connect(verbose = false): Promise<Database> {
     database: dbname!
   })
   const instance = await conn.connect()
-  if (verbose) console.log("connected!")
+  console.log("connected!")
   return instance
 }
 

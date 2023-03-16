@@ -29,14 +29,14 @@ importers:
       '@grimo/metadata': workspace:*
       '@types/node': ^17.0.21
       pg-promise: ^10.11.1
-      toptions: ^1.0.2
+      toptions: ^2.0.0
       ts-node: ^10.9.1
       typescript: ^4.6.2
     dependencies:
       '@grimo/api-discovery': link:../api-discovery
       '@grimo/generate-typescript': link:../generate-typescript
       pg-promise: 10.11.1
-      toptions: 1.0.2
+      toptions: 2.0.0
     devDependencies:
       '@grimo/metadata': link:../metadata
       '@types/node': 17.0.21
@@ -586,8 +586,8 @@ packages:
     resolution: {integrity: sha512-VBiJxFkxiXRlUIeyMQi8s4hgvKCSjtknJv/LVYbrgALPwf5zSKmEwV9Lst25AkvMDnvxODugjdl6KZgwKM1WYQ==}
     engines: {node: '>= 10.x'}
 
-  /toptions/1.0.2:
-    resolution: {integrity: sha512-0g9tu895STABq+bqDJUntvBqCbu6S6M43fzxT7MEKeCQd1u008300oO1CdOLFLhsLWFy3fd5X8enBHl0TGW1Wg==}
+  /toptions/2.0.0:
+    resolution: {integrity: sha512-1L4/G0KCZpgIwq+2PI+qlDuQztTHYiT5vjdu+j6nVWPDPNlyr2SFL/fwAmHK/eoSF0LKgHcW0qzzmOFyYYP9cg==}
     dev: false
 
   /tr46/0.0.3:

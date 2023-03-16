@@ -38,6 +38,7 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [ ] `transport-db`: INSERT, UPDATE, DELETE
 - [ ] `metadata`/`api-client`: Support additional filters (`like`, `ilike`, `in`, etc.)
 - [ ] `metadata`/`api-client`: Support JOINs
+- [ ] Support primary and foreign keys
 - [ ] Support `select count`
 - [ ] Support connection parameters in grimo.json
 - [ ] Example project
@@ -45,6 +46,7 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [ ] `build-schema` package for simple conventional concat/config of .sql files
 - [ ] Comprehensive tests
 - [ ] Trim down `grimo` package
+- [ ] Binary types
 
 ## Backlog
 
