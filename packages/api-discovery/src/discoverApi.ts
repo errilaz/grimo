@@ -1,17 +1,20 @@
 import type { SchemaData, EnumData, TypeData, TableData, FuncData, ApiType, AttributeData } from "@grimo/metadata"
-import type * as pg from "pg-promise"
+import { Database } from "./common"
+import findComposites from "./findComposites"
+import findEnums from "./findEnums"
+import findFunctions from "./findFunctions"
+import findTables from "./findTables"
+import findViews from "./findViews"
 
 /**
  * This is a rough first pass at the schema inspector.
  *    TODO: views
- *    TODO: represent foreign keys
+ *    TODO: represent foreign keys & primary keys
  *    TODO: better UDT detection
  */
 
-type Database = pg.IConnected<{}, any>
-
 /** Inspect a database and build the metadata necessary to generate the API. */
-export default async function discoverApi(db: Database, settings: Partial<DiscoverOptions> = {}): Promise<SchemaData> {
+export default async function discover(db: Database, settings: Partial<DiscoverOptions> = {}): Promise<SchemaData> {
   const { verbose, udts }: DiscoverOptions = {
     verbose: !!settings.verbose,
     udts: {
@@ -21,22 +24,26 @@ export default async function discoverApi(db: Database, settings: Partial<Discov
   }
 
   log("discovering enum types")
-  const enums = await discoverEnums(db)
+  const enums = await findEnums(db)
   log("enums", enums)
 
   log("discovering composite types")
-  const types = await discoverTypes(db, udts)
-  log("composite types", types)
+  const composites = await findComposites(db)
+  log("composite types", composites)
 
   log("discovering tables")
-  const tables = await discoverTables(db, udts)
+  const tables = await findTables(db)
   log("tables", tables)
 
+  log("discovering views")
+  const views = await findViews(db)
+  log("views", views)
+
   log("discovering functions")
-  const functions = await discoverFunctions(db, udts)
+  const functions = await findFunctions(db)
   log("functions", functions)
 
-  const schema = { enums, types, tables, functions }
+  // const schema = { enums, types, tables, functions }
 
   log("resolving types")
   const resolved = resolveTypes(schema)
@@ -46,10 +53,11 @@ export default async function discoverApi(db: Database, settings: Partial<Discov
   // const relationships = await resolveRelationships(db, schema)
   // log("relationships", relationships)
 
-  return schema
+  process.exit()
+  return {}
 
-  function log(...args: any[]) {
-    if (verbose) console.log(...args)
+  function log(text: string, things?: { name: string }[]) {
+    if (verbose) console.log(text + (!things ? "" : ": " + things?.map(t => t.name).join(", ")))
   }
 }
 
@@ -62,96 +70,6 @@ export interface DiscoverOptions {
   verbose: boolean
   // TODO: make inspector smart enough to obviate need for this
   udts: UdtOptions
-}
-
-/** Collect metadata about database enums. */
-async function discoverEnums(db: Database): Promise<EnumData[]> {
-  return (await db.manyOrNone<{
-    name: string
-    order: number
-    enum_name: string
-  }>(sql`
-      select e.enumlabel "name", e.enumsortorder "order", t.typname "enum_name"
-        from pg_enum e
-        join pg_type t
-          on e.enumtypid = t.oid
-         and t.typnamespace in (
-          select oid
-          from pg_namespace
-          where nspname = 'public'
-        )
-    `)).reduce((enums, { name, order, enum_name }) => {
-    let enu = enums.find(e => e.name === enum_name)
-    if (!enu) {
-      enu = { name: enum_name, apiName: snakeToPascal(enum_name), fields: [] }
-      enums.push(enu)
-    }
-    enu.fields.push({ name, order })
-    return enums
-  }, [] as EnumData[])
-}
-
-/** Collect metadata about composite user-defined types. */
-async function discoverTypes(db: Database, udts: UdtOptions): Promise<TypeData[]> {
-  return Promise.all((await db.manyOrNone<{ name: string }>(sql`
-    select i.user_defined_type_name "name"
-      from information_schema.user_defined_types i
-     where i.user_defined_type_schema = 'public'
-    `)).map(async ({ name }) => ({
-    name,
-    apiName: snakeToPascal(name),
-    attributes: (await db.manyOrNone<AttrRecord>(sql`
-      select i.attribute_name "name", i.ordinal_position "order", i.is_nullable = 'YES' "nullable", i.data_type "type", i.attribute_udt_name "udt"
-        from information_schema.attributes i
-       where i.udt_schema = 'public'
-         and i.udt_name = '${name}'
-    `)).map(makeGetAttribute(udts))
-  })))
-}
-
-/** Collect metadata about tables. */
-async function discoverTables(db: Database, udts: UdtOptions): Promise<TableData[]> {
-  return Promise.all((await db.manyOrNone<{ name: string }>(sql`
-      select table_name "name"
-      from information_schema.tables
-      where table_schema = 'public'
-    `)).map(async ({ name }) => ({
-    name,
-    apiName: snakeToPascal(name),
-    columns: (await db.manyOrNone<AttrRecord>(sql`
-      select i.column_name "name", i.ordinal_position "order", i.is_nullable = 'YES' "nullable", i.data_type "type", i.udt_name "udt"
-        from information_schema.columns i
-      where i.table_schema = 'public'
-        and i.table_name = '${name}'
-    `)).map(makeGetAttribute(udts))
-  })))
-}
-
-/** Collect metadata about functions. */
-async function discoverFunctions(db: Database, udts: UdtOptions): Promise<FuncData[]> {
-  return Promise.all((await db.manyOrNone<{
-    name: string, type: string, udt: string | null, specific_name: string
-  }>(sql`
-      select routine_name "name", data_type "type", udt_name "udt", specific_name
-      from information_schema.routines
-      where specific_schema = 'public'
-  `)).map(async ({ name, type, udt, specific_name }) => ({
-    name,
-    returnType: forceDeduceType(type, udt, udts),
-    parameters: (await db.manyOrNone<{
-      name: string, type: string, udt: string | null, order: number
-    }>(sql`
-        select parameter_name "name", data_type "type", udt_name "udt", ordinal_position "order"
-          from information_schema.parameters
-         where specific_name = '${specific_name}'
-      order by specific_name, ordinal_position asc
-    `)).map(({ name, type, udt, order }) => ({
-      name,
-      order,
-      nullable: false,
-      apiType: forceDeduceType(type, udt, udts)
-    }))
-  })))
 }
 
 const UNRESOLVED_UDT = "UNRESOLVED_UDT"
@@ -184,6 +102,10 @@ function resolveTypes({ enums, types, tables, functions }: SchemaData) {
       return 1
     }
     if (column.apiType[0] !== UNRESOLVED_UDT) {
+      return 0
+    }
+    if (["json", "jsonb"].includes(column.apiType[1])) {
+      column.apiType = "json"
       return 0
     }
     const type = types.find(t => t.name === column.apiType[1])
@@ -226,9 +148,9 @@ async function resolveRelationships(db: Database, { enums, types, tables }: Sche
 function makeGetAttribute(udts: UdtOptions) {
   // TODO: make HOF, pass in UDTs from config
   return function getAttribute({ name, type, udt, nullable, order }: AttrRecord): AttributeData {
-    if (udt?.endsWith("_not_null")) {
+    if (udt?.endsWith("_not_null") || udt?.endsWith("_required")) {
       nullable = false
-      udt = udt.substring(0, udt.length - "_not_null".length)
+      udt = udt.replace(/(_not_null)|(_required)$/, "")
     }
     if (udt?.startsWith("_")) {
       udt = udt.substring(1)
@@ -241,6 +163,7 @@ function makeGetAttribute(udts: UdtOptions) {
       name,
       order,
       nullable,
+      type,
       apiType: apiType,
     }
   }
@@ -263,6 +186,9 @@ function deduceType(type: string, udt: string | null, udts: UdtOptions): ApiType
   }
   else if (isKnownDateType(type) || isKnownDateType(udt)) {
     return "Date"
+  }
+  else if (type === "json" || type === "jsonb") {
+    return "object"
   }
   else if (type === "USER-DEFINED") {
     return [UNRESOLVED_UDT, udt] as unknown as ApiType
@@ -318,20 +244,4 @@ interface KeyRecord {
   source_column: string
   target_table: string
   target_column: string
-}
-
-/** Pass-thru template string function for IDE hiliting. */
-function sql(literals: TemplateStringsArray, ...placeholders: (string | number | boolean)[]) {
-  let s = ""
-  for (let i = 0; i < placeholders.length; i++) {
-    s += literals[i]
-    s += placeholders[i]
-  }
-  s += literals[literals.length - 1]
-  return s
-}
-
-export function snakeToPascal(word: string) {
-  return word[0].toUpperCase() + word.substring(1)
-    .replace(/_(\w)/g, (_, w) => w.toUpperCase())
 }

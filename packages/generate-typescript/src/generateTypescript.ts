@@ -130,6 +130,9 @@ function generateTsType(apiType: string[]): string {
   if (Array.isArray(apiType)) {
     return apiType[1]
   }
+  if (apiType === "json") {
+    return "any"
+  }
   return apiType as unknown as string
 }
 

@@ -4,6 +4,8 @@
 
 ⚠️ Under heavy construction, pre-alpha state! ⚠️
 
+⚠️ Working directly on `master` branch - I will break it! ⚠️
+
 - Automatically build an API from your database schema and use it directly on the front-end.
 - Stop writing boilerplate HTTP endpoints. Your database has tables, views, and functions.
 - Stop using ORMs, micro-ORMs, & mappers. Your database has types.
@@ -35,12 +37,14 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [ ] `middleware-fastify`
 - [ ] `transport-db`: INSERT, UPDATE, DELETE
 - [ ] `metadata`/`api-client`: Support additional filters (`like`, `ilike`, `in`, etc.)
+- [ ] `metadata`/`api-client`: Support JOINs
 - [ ] Support `select count`
 - [ ] Support connection parameters in grimo.json
 - [ ] Example project
 - [ ] Smarter schema discovery (views, FKs, and better UDTs)
 - [ ] `build-schema` package for simple conventional concat/config of .sql files
 - [ ] Comprehensive tests
+- [ ] Trim down `grimo` package
 
 ## Backlog
 

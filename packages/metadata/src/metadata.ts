@@ -44,6 +44,7 @@ export type ApiType =
 | "boolean"
 | "number"
 | "string"
+| "json"
 | "Date"
 | ["enum", EnumData]
 | ["interface", TypeData]
@@ -53,7 +54,7 @@ export type ApiType =
 export interface TableData {
   /** Database name of the table. */
   name: string
-  /** Generated TypeScript name of the table. */
+  /** Generated API name of the table. */
   apiName: string
   /** Metadata about table columns. */
   columns: AttributeData[]
@@ -63,21 +64,37 @@ export interface TableData {
 export interface TypeData {
   /** Database name of the composite type. */
   name: string
-  /** Generated TypeScript name of the composite type. */
+  /** Generated API name of the composite type. */
   apiName: string
   /** Metadata about the type's attributes. */
   attributes: AttributeData[]
+}
+
+/** View metadata. */
+export interface ViewData {
+  /** Database name of the view. */
+  name: string
+  /** Generated API name of the view. */
+  apiName: string
+  /** Metadata about view columns. */
+  columns: AttributeData[]
+  /** This view can be updated. */
+  updatable: boolean
+  /** This view can be inserted into. */
+  insertable: boolean
 }
 
 /** Represents a composite type attribute. */
 export interface AttributeData {
   /** Database name of the attribute. */
   name: string
+  /** Database type of the attribute. */
+  type: string
   /** Order of the attribute. */
   order: number
   /** Whether this attribute allows NULL as a value. */
   nullable: boolean
-  /** TypeScript type of the attribute. */
+  /** Api type of the attribute. */
   apiType: ApiType
 }
 
@@ -85,7 +102,7 @@ export interface AttributeData {
 export interface EnumData {
   /** Database name of the enum. */
   name: string
-  /** Generated TypeScript name of the enum. */
+  /** Generated API name of the enum. */
   apiName: string
   /** Possible fields of this enum. */
   fields: FieldData[]
@@ -105,8 +122,10 @@ export interface FuncData {
   name: string
   /** Parameters this function accepts. */
   parameters: AttributeData[]
-  /** TypeScript type of the return value. */
-  returnType: ApiType
+  /** Database type of the return value. */
+  returnType: string
+  /** Api type of the return value. */
+  apiReturnType: ApiType
 }
 
 // Queries and commands
@@ -169,6 +188,7 @@ export interface CallCommand {
 export type Condition =
 | UnaryCondition
 | BinaryCondition
+| TernaryCondition
 
 /** A unary condition. */
 export interface UnaryCondition {
@@ -185,15 +205,49 @@ export interface BinaryCondition {
   value: any
 }
 
+export interface TernaryCondition {
+  column: string
+  arity: 2
+  operator: TernaryOperator
+  value1: any
+  value2: any
+}
+
 /** Unary operator. */
 export type UnaryOperator =
 | "is null"
 | "is not null"
+| "is true"
+| "is not true"
+| "is false"
+| "is not false"
+| "is unknown"
+| "is not unknown"
 
 /** Binary operator. */
 export type BinaryOperator =
 | "="
+| "<>"
 | ">"
 | "<"
 | ">="
 | "<="
+| "is distinct from"
+| "is not distinct from"
+| "like"
+| "not like"
+| "ilike"
+| "not ilike"
+| "similar to"
+| "not similar to"
+| "~"
+| "~*"
+| "!~"
+| "!~*"
+| "^@"
+
+export type TernaryOperator =
+| "between"
+| "not between"
+| "between symmetric"
+| "not between symmetric"

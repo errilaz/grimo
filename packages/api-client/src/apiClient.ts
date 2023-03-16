@@ -107,7 +107,7 @@ export interface Delete<Table, Returning> extends HasWhereClause<Table> {
   /** Specify a `RETURNING *` clause. */
   returning(all: "*"): Delete<Table, Table[]>
   /** Specify a `RETURNING` clause with the chosen columns. */
- returning<Column extends (keyof Table)>(columns: Column[]): Delete<Table, Pick<Table, Column>[]>
+  returning<Column extends (keyof Table)>(columns: Column[]): Delete<Table, Pick<Table, Column>[]>
 }
 
 /** Constructs table queries/statements for sending through a transport. */
@@ -302,6 +302,12 @@ function where(column: string, query: { conditions?: Condition[] }, operator: an
 const unaryOperators = [
   "is null",
   "is not null",
+  "is true",
+  "is not true",
+  "is false",
+  "is not false",
+  "is unknown",
+  "is not unknown",
 ]
 
 function isUnaryOperator(o: string) {
@@ -310,12 +316,37 @@ function isUnaryOperator(o: string) {
 
 const binaryOperators = [
   "=",
+  "<>",
   ">",
   "<",
   ">=",
   "<=",
+  "is distinct from",
+  "is not distinct from",
+  "like",
+  "not like",
+  "ilike",
+  "not ilike",
+  "similar to",
+  "not similar to",
+  "~",
+  "~*",
+  "!~",
+  "!~*",
+  "^@",
 ]
 
 function isBinaryOperator(o: string) {
   return binaryOperators.indexOf(o) !== -1
+}
+
+const ternaryOperators = [
+  "between",
+  "not between",
+  "between symmetric",
+  "not between symmetric",
+]
+
+function isTernaryOperator(o: string) {
+  return ternaryOperators.indexOf(o) !== -1
 }
