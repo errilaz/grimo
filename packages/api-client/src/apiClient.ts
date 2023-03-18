@@ -1,5 +1,5 @@
 import type {
-  SchemaData, TableData, FuncData,
+  SchemaData, TableData, FunctionData,
   ApiTransport,
   SelectQuery, InsertCommand, UpdateCommand, DeleteCommand, CallCommand,
   UnaryOperator, BinaryOperator, Condition
@@ -279,7 +279,7 @@ class DeleteBuilder implements Delete<any, any> {
 }
 
 /** Constructs declarative function calls. */
-function functionApi(transport: ApiTransport, func: FuncData) {
+function functionApi(transport: ApiTransport, func: FunctionData) {
   return (...parameters: any[]) => {
     return transport.call({ procedure: func.name, parameters })
   }

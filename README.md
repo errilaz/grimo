@@ -29,37 +29,69 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 
 ## Roadmap
 
-- [x] Basic schema discovery
+### Basic features
+
+- [x] Schema discovery
 - [x] Strongly typed API generator
 - [x] SELECT and function query builder
-- [x] Integration with Express, Koa, HatTip
-- [ ] `transport-supabase`
+- [ ] Example project
+- [ ] Tests
+s
+### Basic SQL operations (`@grimo/db-transport`)
+
+- [x] Select queries
+- [ ] Inserts
+- [ ] Updates
+- [ ] Deletes
+- [ ] Function calls
+
+### Query Builder (`@grimo/api-client`)
+
+- [x] Selects
+- [x] Inserts
+- [x] Updates
+- [x] Deletes
+- [ ] Function calls
+- [ ] Joins
+- [ ] `DISTINCT`
+- [ ] `COUNT`
+- [ ] `GROUP BY`
+
+### Schema Discovery & Metadata
+
+- [x] Tables
+- [x] Views
+- [x] Functions
+- [x] Composite types
+- [x] Enums
+- [x] Domains
+- [ ] Primary keys
+- [ ] Foreign keys
+- [ ] [`pg_tagged_unions`](https://github.com/errilaz/pg_tagged_unions) support
+- [ ] Binary data types
+
+### Middleware
+
+- [x] `middleware-express`
+- [x] `middleware-koa`
+- [x] `middleware-hattip`
 - [ ] `middleware-fastify`
 - [ ] `middleware-bun`
 - [ ] `middleware-elysia`
 - [ ] `middleware-hono`
-- [ ] `transport-db`: INSERT, UPDATE, DELETE
-- [ ] `metadata`/`api-client`: Support additional filters (`like`, `ilike`, `in`, etc.)
-- [ ] `metadata`/`api-client`: Support JOINs
-- [ ] Support primary and foreign keys
-- [ ] Support `select count`
-- [ ] Support connection parameters in grimo.json
-- [ ] Example project
-- [ ] Smarter schema discovery (views, FKs, and better UDTs)
-- [ ] `build-schema` package for simple conventional concat/config of .sql files
-- [ ] Comprehensive tests
-- [ ] Trim down `grimo` package
-- [ ] Binary types
-- [ ] Support `pg_tagged_unions`
+
+### Transports
+
+- [x] `transport-web`
+- [ ] `transport-db` (partial)
+- [ ] `transport-supabase` (experimental)
 
 ## Backlog
 
 - [ ] Investigate decoupling from `pg-promise` - unsure about deno support. `postgres` supports all three runtimes but does not provide necessary standalone escaping/formatting
-- [ ] `generate-flow` package
 - [ ] `generate-rescript` package
 - [ ] Reusable authentication & authorization
-- [ ] `NOTIFY`/`LISTEN` support?
 - [ ] Realtime streams
 - [ ] Tooling/guidance on schema diffing migrations
 - [ ] Investigate making a stand-alone server package
-
+- [ ] `build-schema` package for simple conventional concat/config of .sql files
