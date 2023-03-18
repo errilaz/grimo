@@ -17,6 +17,7 @@ export default async function findEnums(db: Database): Promise<EnumData[]> {
           from pg_namespace
           where nspname = 'public'
         )
+      order by e.enumsortorder asc
     `)).reduce((enums, { name, order, enum_name }) => {
     let enu = enums.find(e => e.name === enum_name)
     if (!enu) {

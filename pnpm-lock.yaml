@@ -29,6 +29,7 @@ importers:
       '@grimo/metadata': workspace:*
       '@types/node': ^17.0.21
       pg-promise: ^10.11.1
+      tiny-colors: ^2.0.2
       toptions: ^2.0.0
       ts-node: ^10.9.1
       typescript: ^4.6.2
@@ -36,6 +37,7 @@ importers:
       '@grimo/api-discovery': link:../api-discovery
       '@grimo/generate-typescript': link:../generate-typescript
       pg-promise: 10.11.1
+      tiny-colors: 2.0.2
       toptions: 2.0.0
     devDependencies:
       '@grimo/metadata': link:../metadata
@@ -585,6 +587,10 @@ packages:
   /split2/4.1.0:
     resolution: {integrity: sha512-VBiJxFkxiXRlUIeyMQi8s4hgvKCSjtknJv/LVYbrgALPwf5zSKmEwV9Lst25AkvMDnvxODugjdl6KZgwKM1WYQ==}
     engines: {node: '>= 10.x'}
+
+  /tiny-colors/2.0.2:
+    resolution: {integrity: sha512-FYzA5Q5myp26PIZ4mx/03SreNgB1dGqcHJnj1Z8UVQ8/CBw0c6qRoPgRdk8rKpviY5diZyOmRGYMYKLYbjnmWQ==}
+    dev: false
 
   /toptions/2.0.0:
     resolution: {integrity: sha512-1L4/G0KCZpgIwq+2PI+qlDuQztTHYiT5vjdu+j6nVWPDPNlyr2SFL/fwAmHK/eoSF0LKgHcW0qzzmOFyYYP9cg==}

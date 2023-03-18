@@ -41,7 +41,8 @@ export interface SchemaData {
 }
 
 /** Type representations of database values. */
-export type ApiType = 
+export type ApiType =
+| "unknown"
 | "boolean"
 | "number"
 | "bigint"
@@ -126,9 +127,9 @@ export interface FunctionData {
   /** Parameters this function accepts. */
   parameters: AttributeData[]
   /** Database type of the return value. */
-  returnType: string
+  type: string
   /** API type of the return value. */
-  apiReturnType: ApiType
+  apiType: ApiType
 }
 
 // Queries and commands

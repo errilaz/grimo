@@ -35,6 +35,9 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [x] Integration with Express, Koa, HatTip
 - [ ] `transport-supabase`
 - [ ] `middleware-fastify`
+- [ ] `middleware-bun`
+- [ ] `middleware-elysia`
+- [ ] `middleware-hono`
 - [ ] `transport-db`: INSERT, UPDATE, DELETE
 - [ ] `metadata`/`api-client`: Support additional filters (`like`, `ilike`, `in`, etc.)
 - [ ] `metadata`/`api-client`: Support JOINs
@@ -47,14 +50,15 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [ ] Comprehensive tests
 - [ ] Trim down `grimo` package
 - [ ] Binary types
+- [ ] Support `pg_tagged_unions`
 
 ## Backlog
 
-- [ ] Investigate decoupling from `pg-promise` - unsure about deno support. `postgres` supports all three runtimes but does not provide standalone escaping/formatting
+- [ ] Investigate decoupling from `pg-promise` - unsure about deno support. `postgres` supports all three runtimes but does not provide necessary standalone escaping/formatting
 - [ ] `generate-flow` package
 - [ ] `generate-rescript` package
-- [ ] Way to discover/generate proper union types
 - [ ] Reusable authentication & authorization
+- [ ] `NOTIFY`/`LISTEN` support?
 - [ ] Realtime streams
 - [ ] Tooling/guidance on schema diffing migrations
 - [ ] Investigate making a stand-alone server package

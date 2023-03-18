@@ -7,6 +7,7 @@ export default async function findTables(db: Database): Promise<CompositeRecord[
     select table_name "name"
       from information_schema.tables
      where table_schema = 'public'
+       and table_type = 'BASE TABLE'
   `)
   return Promise.all(tables.map(async ({ name }) => ({
     name,
