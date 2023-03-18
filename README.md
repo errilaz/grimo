@@ -36,7 +36,7 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [x] SELECT and function query builder
 - [ ] Example project
 - [ ] Tests
-s
+
 ### Basic SQL operations (`@grimo/db-transport`)
 
 - [x] Select queries
