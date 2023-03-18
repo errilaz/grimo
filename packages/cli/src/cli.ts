@@ -21,8 +21,9 @@ const parse = options({
 })
 
 const { command, help, file, ...config } = parse(process.argv.slice(2))
+if (config.global === false) config.global = undefined as unknown as boolean
 
-if (command === null) {
+if (command === undefined) {
   console.log("Missing command!")
   usage()
   process.exit(1)

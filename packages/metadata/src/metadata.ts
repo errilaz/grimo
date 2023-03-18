@@ -124,6 +124,8 @@ export interface FieldData {
 export interface FunctionData {
   /** Database name of the function. */
   name: string
+  /** Type name of function signature. */
+  signatureName: string
   /** Parameters this function accepts. */
   parameters: AttributeData[]
   /** Database type of the return value. */

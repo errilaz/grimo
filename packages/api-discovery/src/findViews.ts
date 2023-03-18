@@ -3,8 +3,8 @@ import { CompositeRecord } from "./findComposites"
 import { findColumns } from "./findTables"
 
 export interface ViewRecord extends CompositeRecord {
-  updatable: boolean
-  insertable: boolean
+  updatable: string
+  insertable: string
 }
 
 /** Collect metadata about tables. */

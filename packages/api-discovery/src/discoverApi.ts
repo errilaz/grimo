@@ -56,8 +56,8 @@ export default async function discover(db: Database, options: DiscoverOptions) {
   function createView({ name, attributes, updatable, insertable }: ViewRecord): ViewData {
     return {
       name,
-      insertable,
-      updatable,
+      insertable: insertable === "YES",
+      updatable: updatable === "YES",
       apiName: apiName(name),
       columns: attributes.map(createAttribute),
     }
@@ -67,6 +67,7 @@ export default async function discover(db: Database, options: DiscoverOptions) {
     const { apiType } = resolveType(type, udt)
     return {
       name,
+      signatureName: apiName(name),
       type: type === userDefinedType ? udt! : type,
       apiType,
       parameters: parameters.map(createAttribute),

@@ -21,9 +21,6 @@
   },
   "dependencies": {
     "@grimo/api-client": "workspace:*",
-    "@grimo/middleware-koa": "workspace:*",
-    "@grimo/middleware-express": "workspace:*",
-    "@grimo/middleware-hattip": "workspace:*",
     "@grimo/transport-db": "workspace:*",
     "@grimo/metadata": "workspace:*",
     "@grimo/transport-web": "workspace:*"
