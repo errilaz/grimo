@@ -51,11 +51,12 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [x] Inserts
 - [x] Updates
 - [x] Deletes
-- [ ] Function calls
+- [x] Function calls
 - [ ] Joins
 - [ ] `DISTINCT`
 - [ ] `COUNT`
 - [ ] `GROUP BY`
+- [ ] Properly type views with `updatable`/`insertable`
 
 ### Schema Discovery & Metadata
 

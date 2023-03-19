@@ -6,9 +6,11 @@ import type {
 } from "@grimo/metadata"
 
 /** Generic shape of generated API. */
-export interface ApiBase<Tables, Functions> {
+export interface ApiBase<Tables, Views, Functions> {
   /** Tables in this schema. */
   tables: Tables
+  /** Views in this schema. */
+  views: Views
   /** Functions in this schema. */
   functions: Functions
   /** Information about the schema. */
@@ -16,8 +18,9 @@ export interface ApiBase<Tables, Functions> {
 }
 
 /** Query building interface. */
-export type ApiClient<Api extends ApiBase<Api["tables"], Api["functions"]>> =
+export type ApiClient<Api extends ApiBase<Api["tables"], Api["views"], Api["functions"]>> =
 & TablesClient<Api["tables"]>
+& TablesClient<Api["views"]>
 & FunctionsClient<Api["functions"]>
 
 /** Strongly-typed interface to database tables in the API. */
@@ -30,10 +33,13 @@ export module ApiClient {
   const define = (o: any, p: string, value: any) => Object.defineProperty(o, p, { value, enumerable: true })
   
   /** Create a client interface with the given generated API and a transport. */
-  export function create<Api extends ApiBase<Api["tables"], Api["functions"]>>(api: Api, transport: ApiTransport): ApiClient<Api> {
+  export function create<Api extends ApiBase<Api["tables"], Api["views"], Api["functions"]>>(api: Api, transport: ApiTransport): ApiClient<Api> {
     const client: Partial<ApiClient<Api>> = {}
     for (const table of api.schema.tables) {
       define(client, table.name, new ClientTableApi(transport, table))
+    }
+    for (const view of api.schema.views) {
+      define(client, view.name, new ClientTableApi(transport, view))
     }
     for (const func of api.schema.functions) {
       define(client, func.name, functionApi(transport, func))
@@ -70,14 +76,16 @@ export interface HasWhereClause<Table> {
 
 /** Select query builder. */
 export interface Select<Columns, Table> extends HasWhereClause<Table> {
-  /** Issue the query. */
+  /** Issue the query, expecting an array of results. */
   fetch(): Promise<Columns[]>
+  /** Issue the query, returning a single result, or throwing.. */
+  fetchOne(): Promise<Columns>
   /** Add a `LIMIT` clause. */
   limit(n: number): this
   /** Add an `OFFSET` clause. */
   offset(n: number): this
-  /** Add an `ORDER BY` clause. */
-  orderBy<Column extends (keyof Table)>(columns: Column[], direction?: "asc" | "desc"): this
+  /** Add an `ORDER BY` sort expression. */
+  orderBy(sorts: [keyof Table, "asc" | "desc"][]): this
 }
 
 /** Insert statement builder. */
@@ -160,6 +168,14 @@ class SelectBuilder implements Select<any, any> {
     return this.transport.select(this.query)
   }
 
+  async fetchOne(): Promise<any> {
+    const results = await this.transport.select(this.query)
+    if (results[0] === undefined) {
+      throw new Error(`Query did not return a result (table: "${this.table.name}").`)
+    }
+    return results[0]
+  }
+
   limit(n: number) {
     this.query.limit = n
     return this
@@ -178,14 +194,9 @@ class SelectBuilder implements Select<any, any> {
     return this
   }
 
-  orderBy<Column extends string | number | symbol>(columns: Column[], direction?: "asc" | "desc"): this {
-    if (direction !== "asc" && direction !== "desc") {
-      throw new Error(`Invalid orderBy direction: "${direction}".`)
-    }
-    this.query.orderBy = {
-      columns: columns as string[],
-      direction: direction || "asc",
-    }
+  orderBy(sorts: [string, "asc" | "desc"][]): this {
+    this.query.orderBy = sorts
+      .map(([column, direction]) => ({ column, direction }))
     return this
   }
 }
@@ -334,19 +345,12 @@ const binaryOperators = [
   "!~",
   "!~*",
   "^@",
-]
-
-function isBinaryOperator(o: string) {
-  return binaryOperators.indexOf(o) !== -1
-}
-
-const ternaryOperators = [
   "between",
   "not between",
   "between symmetric",
   "not between symmetric",
 ]
 
-function isTernaryOperator(o: string) {
-  return ternaryOperators.indexOf(o) !== -1
+function isBinaryOperator(o: string) {
+  return binaryOperators.indexOf(o) !== -1
 }

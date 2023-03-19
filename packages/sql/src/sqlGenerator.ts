@@ -1,50 +1,52 @@
-import type {
-    SelectQuery, InsertCommand, UpdateCommand, DeleteCommand, CallCommand,
-    Condition, DbFormatter
-} from "@grimo/metadata"
+import type { SelectQuery, DbFormatter, BinaryCondition } from "@grimo/metadata"
+import CodeBuilder from "@grimo/code-builder"
 
-/** Generates Postgres statements from declarative representations created by the API. */
-export default class SqlGenerator {
-  private format: DbFormatter
-
-  constructor(format: DbFormatter) {
-    this.format = format
+export type SqlGenerator = ReturnType<typeof sqlGenerator>
+/** Generates Postgres statements from representations created by the API. */
+export default function sqlGenerator(format: DbFormatter) {
+  return {
+    select,
   }
 
-  select(select: SelectQuery) {
-    const columns = select.selected?.map(this.format.name) || "*"
-    const where = select.conditions && select.conditions.length > 0
-    const conditions = select.conditions?.map(c => this.generateCondition(c)).join(" and ") || ""
-    const limit = select.limit ? `limit ${this.format.number(select.limit)}` : ""
-    const offset = select.offset ? `offset ${this.format.number(select.offset)}` : ""
-    const orderBy = select.orderBy === undefined ? ""
-      : "order by " + select.orderBy.columns.map(this.format.name).join(", ")
-      + select.orderBy.direction
-    return `
-      select ${columns}
-      from ${select.table}
-      ${where} ${conditions}
-      ${limit}
-      ${offset}
-      ${orderBy}
-    `
-  }
-
-  private generateHeader(sessionToken: string) {
-    return `
-      set role 'api';
-      select set_config('request.session_token', '${sessionToken}', true);
-    `
-  }
-
-  private generateCondition(condition: Condition) {
-    if (condition.arity === 1) {
-      return this.format.name(condition.column)
-        + " " + condition.operator
-    }
-    else {
-      return this.format.name(condition.column)
-        + " " + condition.operator + this.format.value(condition.value)
-    }
+  function select({ selected, table, conditions, limit, offset, orderBy }: SelectQuery) {
+    if (conditions?.length === 0) conditions = undefined
+    const sq = new CodeBuilder()
+    return sq
+      .push(`select `)
+      .when(selected, selected => {
+        sq.push(selected!.map(format.name).join(`, `))
+      })
+      .when(!selected, `*`)
+      .line()
+      .line(`from ${format.name(table)}`)
+      .when(conditions, conditions => {
+        sq.push(`where `)
+          .indent()
+          .each(conditions, (cond, c) => {
+            sq.when(c > 0, ` and `)
+              .push(`${format.name(cond.column)} `)
+              .push(cond.operator)
+              .when(cond.arity === 2, ` ${format.text((cond as BinaryCondition).value)}`)
+              .line()
+          })
+          .dedent()
+      })
+      .when(limit, limit => {
+        sq.line(`limit ${format.number(limit)}`)
+      })
+      .when(offset, offset => {
+        sq.line(`offset ${format.number(offset)}`)
+      })
+      .when(orderBy, orderBy => {
+        sq.push(`order by `)
+          .indent()
+          .each(orderBy, ({ column, direction}, s) => {
+            sq.when(s > 0, `, `)
+              .push(`${format.name(column)} ${direction}`)
+              .line()
+          })
+          .dedent()
+      })
+      .toString()
   }
 }

@@ -26,7 +26,7 @@ export interface DbDriver {
 export interface DbFormatter {
   name(name: any | (() => any)): string
   number(value: number | bigint | (() => number | bigint)): string
-  value(value: any | (() => any)): string
+  text(value: any | (() => any)): string
 }
 
 // Schema
@@ -149,12 +149,7 @@ export interface SelectQuery {
   /** Which columns are being selected in this query. */
   selected?: string[]
   /** Order By clause */
-  orderBy?: {
-    /** Order by columns. */
-    columns: string[]
-    /** Order by direction (`asc` or `desc`) */
-    direction: "asc" | "desc"
-  }
+  orderBy?: OrderBySort[]
 }
 
 /** Represents an update command. */
@@ -190,11 +185,15 @@ export interface CallCommand {
   parameters?: any[]
 }
 
+export interface OrderBySort {
+  column: string
+  direction: "asc" | "desc"
+}
+
 /* Represents a condition. */
 export type Condition =
 | UnaryCondition
 | BinaryCondition
-| TernaryCondition
 
 /** A unary condition. */
 export interface UnaryCondition {
@@ -209,14 +208,6 @@ export interface BinaryCondition {
   arity: 2
   operator: BinaryOperator
   value: any
-}
-
-export interface TernaryCondition {
-  column: string
-  arity: 2
-  operator: TernaryOperator
-  value1: any
-  value2: any
 }
 
 /** Unary operator. */
@@ -251,8 +242,6 @@ export type BinaryOperator =
 | "!~"
 | "!~*"
 | "^@"
-
-export type TernaryOperator =
 | "between"
 | "not between"
 | "between symmetric"

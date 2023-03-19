@@ -100,7 +100,7 @@ async function connect({ user, host, port, dbname }: Project): Promise<Database>
 async function findProject(): Promise<Project | null> {
   let dir = process.cwd()
   while (true) {
-    const project = Path.join(dir, "grimo.json")
+    const project = Path.join(dir, "grimo.config.json")
     if (await exists(project)) {
       const text = await FS.readFile(project, "utf8")
       return JSON.parse(text) as Project

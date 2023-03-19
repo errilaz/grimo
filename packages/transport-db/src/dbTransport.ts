@@ -1,6 +1,6 @@
 import type * as pg from "pg-promise"
 import { ApiTransport, CallCommand, DeleteCommand, InsertCommand, SelectQuery, UpdateCommand } from "@grimo/metadata"
-import SqlGenerator from "@grimo/sql"
+import sqlGenerator, { SqlGenerator } from "@grimo/sql"
 
 type Database<T = any> = pg.IBaseProtocol<T>
 
@@ -11,7 +11,7 @@ export class DbTransport implements ApiTransport {
 
   constructor(db: Database, format: pg.IFormatting) {
     this.db = db
-    this.sql = new SqlGenerator(format)
+    this.sql = sqlGenerator(format)
   }
 
   async select(select: SelectQuery) {
