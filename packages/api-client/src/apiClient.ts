@@ -130,7 +130,7 @@ class ClientTableApi implements TableApi<any> {
 
   select(all: "*"): Select<any, any>
   select<Column extends string>(columns: Column[]): Select<Pick<any, any>, any>
-  select(columns: string | string[]): Select<any, any> | Select<Pick<any, any>, any> {
+  select(columns: "*" | string[]): Select<any, any> | Select<Pick<any, any>, any> {
     return new SelectBuilder(this.transport, this.table, columns)
   }
 
@@ -155,7 +155,7 @@ class SelectBuilder implements Select<any, any> {
   table: TableData
   query: SelectQuery
 
-  constructor(transport: ApiTransport, table: TableData, columns: string | string[]) {
+  constructor(transport: ApiTransport, table: TableData, columns: "*" | string[]) {
     this.transport = transport
     this.table = table
     this.query = { table: table.name }
@@ -322,7 +322,7 @@ const unaryOperators = [
 ]
 
 function isUnaryOperator(o: string) {
-  return unaryOperators.indexOf(o) !== -1
+  return unaryOperators.includes(o)
 }
 
 const binaryOperators = [
@@ -352,5 +352,5 @@ const binaryOperators = [
 ]
 
 function isBinaryOperator(o: string) {
-  return binaryOperators.indexOf(o) !== -1
+  return binaryOperators.includes(o)
 }

@@ -6,6 +6,7 @@ import findEnums from "./findEnums"
 import findFunctions, { FunctionRecord } from "./findFunctions"
 import findTables from "./findTables"
 import findViews, { ViewRecord } from "./findViews"
+import parseUnions from "./parseUnions"
 
 export interface DiscoverOptions {
   override?: { [type: string]: string }

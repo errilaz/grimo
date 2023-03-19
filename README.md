@@ -34,6 +34,7 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [x] Schema discovery
 - [x] Strongly typed API generator
 - [x] SELECT and function query builder
+- [ ] OpenAPI document generation
 - [ ] Example project
 - [ ] Tests
 
@@ -52,11 +53,13 @@ Most of these libraries are meant for server-side DB access. Grimo is focused on
 - [x] Updates
 - [x] Deletes
 - [x] Function calls
+- [ ] Support native Date, BigInt in generated types & queries, convert in/out of transports
 - [ ] Joins
 - [ ] `DISTINCT`
 - [ ] `COUNT`
 - [ ] `GROUP BY`
 - [ ] Properly type views with `updatable`/`insertable`
+- [ ] Strongly typed `.where` values
 
 ### Schema Discovery & Metadata
 

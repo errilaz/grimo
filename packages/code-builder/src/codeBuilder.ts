@@ -55,4 +55,9 @@ export default class CodeBuilder {
     }
     return this
   }
+
+  pipe(fn: (cb: CodeBuilder) => void) {
+    fn(this)
+    return this
+  }
 }

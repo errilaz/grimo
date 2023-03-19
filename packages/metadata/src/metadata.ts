@@ -120,6 +120,16 @@ export interface FieldData {
   order: number
 }
 
+/** Experimental. */
+export interface UnionData {
+  /** Database name of the union domain. */
+  name: string
+  /** API name of the union. */
+  apiName: string
+  /** Database type of the union composite type. */
+  type: string
+}
+
 /** Represents a database function (stored procedure). */
 export interface FunctionData {
   /** Database name of the function. */
